@@ -30,6 +30,7 @@ namespace uwu.Controllers
             _config = config;
         }
 
+        // METODO PARA GENERAR EL TOKEN JWT
         private string GenerateJwtToken(UserResponse user)
         {
             var jwtSettings = _config.GetSection("JwtSettings");
@@ -66,6 +67,7 @@ namespace uwu.Controllers
             return Ok(users);
         }
 
+        // GET PARA OBTENER USUARIO POR ID
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUserById(int id)
         {
@@ -80,6 +82,7 @@ namespace uwu.Controllers
             return Ok(user);
         }
 
+        // DELETE PARA ELIMINAR USUARIO
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUsers(int id)
         {
@@ -94,7 +97,6 @@ namespace uwu.Controllers
 
             return Ok("Usuario eliminado correctamente");
         }
-
 
         // PUT PARA ACTUALIZAR USUARIO
         [HttpPut("{id}")]
@@ -174,6 +176,7 @@ namespace uwu.Controllers
             return Ok(userLogin);
         }
 
+        // PUT PARA CAMBIAR EMAIL
         [HttpPut("change-email/{userId}")]
         public async Task<IActionResult> ChangeEmail(int userId, [FromBody] ChangeEmailRequest request)
         {
@@ -200,6 +203,7 @@ namespace uwu.Controllers
             return Ok("Email actualizado correctamente");
         }
 
+        // PUT PARA CAMBIAR CONTRASEÑA
         [HttpPut("change-password/{userId}")]
         public async Task<IActionResult> ChangePassword(int userId, [FromBody] ChangePasswordRequest request)
         {
@@ -224,6 +228,7 @@ namespace uwu.Controllers
             return Ok("Contraseña actualizada correctamente");
         }
 
+        // GET PARA OBTENER DATOS DE USUARIO
         [HttpGet("me")]
         public async Task<IActionResult> Me()
         {

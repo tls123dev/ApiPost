@@ -46,7 +46,7 @@ namespace uwu.Controllers
         // GET PARA OBTENER POSTS POR USUARIO
         [HttpGet]
         [Route("user/{userId}")]
-        public async Task<ActionResult> GetPostsByUser(int userId)
+        public async Task<ActionResult<List<ReadPostResponse>>> GetPostsByUser(int userId)
         {
             // VERIFICAR SI EL USUARIO EXISTE
             var user = await _userRepository.GetUserByIdAsync(userId);
@@ -64,7 +64,9 @@ namespace uwu.Controllers
                 return NotFound($"No se encontraron posts para el usuario con ID {userId}");
             }
 
-            return Ok(posts);
+            var response = posts.Adapt<List<ReadPostResponse>>();
+
+            return Ok(response);
         }
 
         // POST PARA AGREGAR POST
@@ -105,6 +107,7 @@ namespace uwu.Controllers
             return CreatedAtAction(nameof(GetPostById), new { id = post.PostId }, response);
         }
 
+        // DELETE PARA ELIMINAR POST
         [HttpDelete("{id}/user/{userId}")]
         public async Task<ActionResult> DeletePost(int id, int userId)
         {
@@ -151,8 +154,9 @@ namespace uwu.Controllers
 
         // GET PARA OBTENER POST POR ID
         [HttpGet("{id}")]
-        public async Task<ActionResult<Post>> GetPostById(int id)
+        public async Task<ActionResult<ReadPostResponse>> GetPostById(int id)
         {
+            
             // OBTENER POST POR ID
             var post = await _postRepository.GetPostByIdAsync(id);
 
@@ -161,7 +165,12 @@ namespace uwu.Controllers
                 return NotFound($"Post con ID {id} no encontrado");
             }
 
-            return Ok(post);
+            var response = post.Adapt<ReadPostResponse>();
+
+            response.UserName = post.User?.Name;
+            response.UserEmail = post.User?.Email;
+
+            return Ok(response);
         }
     }
 }

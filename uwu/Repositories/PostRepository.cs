@@ -16,7 +16,9 @@ namespace uwu.Repositories
             _context = context;
         }
 
-        // METODOS ASINCRONOS PARA OPERACIONES CRUD
+        //------------------------------------------//
+        // METODOS ASINCRONOS PARA OPERACIONES CRUD //
+        //------------------------------------------//
 
         // METODO PARA AGREGAR UN POST
         public async Task AddPostAsync(Post post)
@@ -28,21 +30,24 @@ namespace uwu.Repositories
         // METODO PARA OBTENER TODOS LOS POSTS
         public async Task<List<Post>> GetPostsAsync()
         {
-            var posts = await _context.Posts.ToListAsync();
+            var posts = await _context.Posts.Include(p => p.User).OrderByDescending(p => p.CreatedAt).ToListAsync();
             return posts;
         }
 
+        // METODO PARA OBTENER POSTS POR USUARIO
         public async Task<List<Post>> GetPostByUserAsync(int userId)
         {
-            var posts = await _context.Posts.Where(p => p.UserId == userId).ToListAsync();
+            var posts = await _context.Posts.Where(p => p.UserId == userId).Include(p => p.User).OrderByDescending(p => p.CreatedAt).ToListAsync();
             return posts;
         }
 
+        // METODO PARA OBTENER POST POR ID
         public async Task<Post?> GetPostByIdAsync(int id)
         {
-            return await _context.Posts.FindAsync(id);
+            return await _context.Posts.Include(p => p.User).FirstOrDefaultAsync(p => p.PostId == id);
         }
 
+        // METODO PARA ELIMINAR POST
         public async Task<bool> DeletePostAsync(int id, int userId)
         {
             var post = await _context.Posts.FirstOrDefaultAsync(p => p.PostId == id && p.UserId == userId);
@@ -54,6 +59,7 @@ namespace uwu.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
+        // METODO POR ACTUALIZAR POST
         public async Task<Post> UpdatePostAsync(Post post)
         {
             var existingPost = await _context.Posts.FindAsync(post.PostId);
@@ -67,6 +73,7 @@ namespace uwu.Repositories
             return existingPost;
         }
 
+        // METODO PARA GUARDAR CAMBIOS
         public async Task<bool> SaveAllAsync()
         {
             return await _context.SaveChangesAsync() > 0;
