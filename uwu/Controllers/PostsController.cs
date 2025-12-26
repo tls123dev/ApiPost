@@ -1,6 +1,5 @@
 ﻿using Mapster;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using uwu.DTOs.Posts.CreatePosts;
 using uwu.Interfaces;
@@ -32,6 +31,7 @@ namespace uwu.Controllers
             // OBTENER TODOS LOS POSTS
             var posts = await _postRepository.GetPostsAsync();
 
+            // VALIDAR SI EXISTEN POST
             if (posts == null || posts.Count == 0)
             {
                 return NotFound("No se encontraron posts");
@@ -51,6 +51,7 @@ namespace uwu.Controllers
             // VERIFICAR SI EL USUARIO EXISTE
             var user = await _userRepository.GetUserByIdAsync(userId);
 
+            // VALIDAR SI EL USUARIO EXISTE
             if (user == null)
             {
                 return NotFound($"Usuario con ID {userId} no encontrado");
@@ -59,6 +60,7 @@ namespace uwu.Controllers
             // OBTENER POSTS POR USUARIO
             var posts = await _postRepository.GetPostByUserAsync(userId);
 
+            // VALIDAR SI EL USUARIO TIENE POST O SI EXISTEN
             if (posts == null || posts.Count == 0)
             {
                 return NotFound($"No se encontraron posts para el usuario con ID {userId}");
@@ -95,14 +97,11 @@ namespace uwu.Controllers
             // INICIALIZAR FECHA DE ACTUALIZACION COMO NULL
             post.UpdatedAt = DateTime.UtcNow;
 
-            // GUARDAR POST
+            // CREAR POST
             await _postRepository.AddPostAsync(post);
 
             // MAPEAR ENTIDAD -> RESPONSE
             var response = post.Adapt<CreatePostResponse>();
-
-            // ASIGNAR NOMBRE DE USUARIO AL RESPONSE
-            response.UserName = User.FindFirst("Name")?.Value;
 
             return CreatedAtAction(nameof(GetPostById), new { id = post.PostId }, response);
         }
@@ -111,6 +110,15 @@ namespace uwu.Controllers
         [HttpDelete("{id}/user/{userId}")]
         public async Task<ActionResult> DeletePost(int id, int userId)
         {
+            // VERIFICAR SI EL USER EXISTE
+            var existingUser = await _userRepository.GetUserByIdAsync(userId);
+
+            // VALIDACION PARA USER EXISTENTE
+            if (existingUser == null)
+            {
+                return NotFound($"Usuario con ID {id} no existe o no coincide con el id del post indicado.");
+            }
+
             // ELIMINA POST POR ID Y USUARIO
             var deletePost = await _postRepository.DeletePostAsync(id, userId);
 
@@ -129,25 +137,30 @@ namespace uwu.Controllers
         {
             // VERIFICAR SI EL POST EXISTE
             var existingPost = await _postRepository.GetPostByIdAsync(id);
+
+            // VALIDACION PARA POST EXISTENTES
             if (existingPost == null)
             {
                 return NotFound($"Post con ID {id} no encontrado para actualizar.");
             }
 
+            // MAPEAR REQUEST -> ENTIDAD
+            request.Adapt(existingPost);
+
+            // ACTUALIZAR FECHA DE ACTUALIZACION
+            existingPost.UpdatedAt = DateTime.UtcNow;
+
             // ACTUALIZAR LOS CAMPOS DEL POST EXISTENTE
-            var updatedPost = await _postRepository.UpdatePostAsync(existingPost);
-            if (updatedPost == null)
+            var updatedPost = await _postRepository.SaveAllAsync();
+
+            // VALIDACION PARA ACTUALIZACION
+            if (!updatedPost)
             {
                 return BadRequest("No se pudo actualizar el post.");
             }
 
-            // MAPEAR REQUEST -> ENTIDAD
-            request.Adapt(updatedPost);
-
-            await _postRepository.SaveAllAsync();
-
             // MAPEAR ENTIDAD -> RESPONSE
-            var response = updatedPost.Adapt<UpdatePostResponse>();
+            var response = existingPost.Adapt<UpdatePostResponse>();
 
             return Ok(response);
         }
@@ -160,15 +173,14 @@ namespace uwu.Controllers
             // OBTENER POST POR ID
             var post = await _postRepository.GetPostByIdAsync(id);
 
+            // VALIDAR SI EL POST EXISTE
             if (post == null)
             {
                 return NotFound($"Post con ID {id} no encontrado");
             }
 
+            // MAPEAR ENTIDAD -> RESPONSE
             var response = post.Adapt<ReadPostResponse>();
-
-            response.UserName = post.User?.Name;
-            response.UserEmail = post.User?.Email;
 
             return Ok(response);
         }

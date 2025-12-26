@@ -18,9 +18,6 @@ namespace uwu.Interfaces
         // METODO PARA ELIMINAR POST
         Task<bool> DeletePostAsync(int id, int userId);
 
-        // METODO PARA ACTUALIZAR POST
-        Task<Post> UpdatePostAsync(Post post);
-
         // METODO PARA AÑADIR POSTs
         Task AddPostAsync(Post post);
 

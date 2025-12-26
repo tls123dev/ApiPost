@@ -20,9 +20,6 @@ namespace uwu.Interfaces
         // METODO PARA ELIMINAR USUARIO
         Task<bool> DeleteUserAsync(int id);
 
-        // METODO PARA ACTUALIZAR USUARIO
-        Task<User> UpdateUserAsync(User user);
-
         // METODO PARA AÑADIR USUARIO
         Task AddUserAsync(User user);
 

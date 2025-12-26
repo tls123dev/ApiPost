@@ -3,7 +3,6 @@ using uwu.Data;
 using uwu.Entities;
 using uwu.Interfaces;
 using Mapster;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace uwu.Repositories
 {
@@ -57,20 +56,6 @@ namespace uwu.Repositories
             }
             _context.Posts.Remove(post);
             return await _context.SaveChangesAsync() > 0;
-        }
-
-        // METODO POR ACTUALIZAR POST
-        public async Task<Post> UpdatePostAsync(Post post)
-        {
-            var existingPost = await _context.Posts.FindAsync(post.PostId);
-            if (existingPost == null)
-            {
-                return null;
-            }
-            existingPost = post.Adapt(existingPost);
-            _context.Posts.Update(existingPost);
-            await _context.SaveChangesAsync();
-            return existingPost;
         }
 
         // METODO PARA GUARDAR CAMBIOS
